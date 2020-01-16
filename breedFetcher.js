@@ -1,31 +1,34 @@
 const request = require("request");
-let input = process.argv.splice(2).toString();
+// let input = process.argv.splice(2).toString();
 
-// console.log(input)
+const fetchBreedDescription = (input, cb) => {
+  // console.log(cb, 'call backk')
+  const api = `https://api.thecatapi.com/v1/breeds/search?q=${input}`;
 
-const api = `https://api.thecatapi.com/v1/breeds/search?q=${input}`;
+  request(api, (error, response, body) => {
+    console.log("error:", error); // Print the error if one occurred
+    console.log("statusCode:", response.statusCode);
+    const data = JSON.parse(body);
 
-request(api, (error, response, body) => {
-  console.log("error:", error); // Print the error if one occurred
-  console.log("statusCode:", response.statusCode);
-  const data = JSON.parse(body);
+    if (response.statusCode === 404) {
+      // console.error("invalid url");
+      cb("invalid URL", null);
+    }
 
-  if (response.statusCode === 404) {
-    console.error("invalid url");
-    return;
-  }
+    // console.log(data, ' data')
+    else if (data[0] === undefined) {
+      // console.error("invalid breed");
+      cb("Breed not found", null);
+    }
+    // console.log(typeof body, ' body type')
+    // console.log(data);
+    // console.log(typeof data, ' body type');
+    else {
+      cb(null, `${data[0].description}`);
+    }
+  });
+};
 
-  // console.log(data, ' data')
+// fetchBreedDescription(input)
 
-  if (data[0] === undefined) {
-    console.error("invalid breed");
-    return;
-  }
-
-  // console.log(typeof body, ' body type')
-
-  // console.log(data);
-  // console.log(typeof data, ' body type');
-
-  console.log(data[0].temperament);
-});
+module.exports = { fetchBreedDescription };
